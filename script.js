@@ -5,7 +5,6 @@ const email = document.getElementById('email');
 const password = document.getElementById('password');
 const password2 = document.getElementById('password2');
 
-// functions needed for the file to work
 
 // show input error message
 function showError(input, message) {
@@ -19,7 +18,6 @@ function showError(input, message) {
 
 }
 
-
 // show success
 function showSuccess(input) {
   // change the css to have the form control error
@@ -27,47 +25,63 @@ function showSuccess(input) {
   formControl.className = 'form-control success'
 };
 
-// function to validate emails
-function validateEmail(email) {
+// function to validate emails --- straight from stackOverflow
+function validateEmail(input) {
   const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
+
+  if (re.test(String(input.value).toLowerCase())) {
+    showSuccess(input)
+  } else {
+    showError(input, 'Email is not valid');
+  }
 }
 
+// check required fields
+function checkRequired(inputArr) {
+  inputArr.forEach(function (input) {
+    if (input.value.trim() === '') {
+      showError(input, `${getFieldName(input)} is required`);
+    } else {
+      showSuccess(input);
+    }
+  });
+}
+
+// upperCase the first letter of each input
+function getFieldName(input) {
+  return input.id.charAt(0).toUpperCase() + input.id.slice(1);
+};
+
+// check the length of the passwords
+function checkLength(input, min, max) {
+  let len = input.value.length;
+
+  if (len < min) {
+    showError(input, `${getFieldName(input)} must be at least ${min} characters`)
+  } else if (len > max) {
+    showError(input, `${getFieldName(input)} must be less than ${max} characters`)
+  } else {
+    showSuccess(input);
+  }
+}
+
+// check the passwords math
+function checkEqualPasswords(inputOne, inputTwo) {
+  if(inputOne.value !== inputTwo.value){
+    showError(inputTwo, `${getFieldName(inputTwo)} passwords do not match!`)
+  } else{
+    showSuccess(inputTwo);
+  }
+
+}
 
 // add the event listener
 form.addEventListener('submit', function (e) {
-
   e.preventDefault(); // prevents the submission
 
-  // if not user name is being passed
-  if (username.value === '') {
-    showError(username, 'Please enter Username to continue')
-  } else {
-    showSuccess(username)
-  }
-
-  // if not user name is being passed
-  if (email.value === '') {
-    showError(email, 'Please enter email to continue')
-  } else if (!(validateEmail(email.value))) {
-    showError(email, 'Please enter a valid email to continue')
-  } else {
-    showSuccess(email)
-  }
-
-  // if not user name is being passed
-  if (password.value === '') {
-    showError(password, 'Please enter password to continue')
-  } else {
-    showSuccess(password)
-  }
-
-  // if not user name is being passed
-  if (password2.value === '') {
-    showError(password2, 'Please confirm the password to continue')
-  } else {
-    showSuccess(password2)
-  }
-
-
+  checkRequired([username, email, password, password2]);
+  checkLength(username, 3, 15);
+  checkLength(password, 6, 20);
+  checkEqualPasswords(password, password2)
+  validateEmail(email);
 });
